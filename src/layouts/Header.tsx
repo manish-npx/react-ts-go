@@ -26,6 +26,9 @@ const Header = () => {
                 </Button>
 
                 <Button asChild variant="ghost">
+                    <Link to="/todos">Todos</Link>
+                </Button>
+                <Button asChild variant="ghost">
                     <Link to="/about">About</Link>
                 </Button>
             </nav>
@@ -45,7 +48,12 @@ const Header = () => {
                         <DropdownMenuItem asChild>
                             <Link to="/blogs">Blogs</Link>
                         </DropdownMenuItem>
-
+                        <DropdownMenuItem asChild>
+                            <Link to="/form">Form</Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link to="/todos">Todos</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                             <Link to="/about">About</Link>
                         </DropdownMenuItem>

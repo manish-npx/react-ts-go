@@ -4,6 +4,7 @@ import path from "path";
 import { defineConfig } from "vite";
 
 // https://vite.dev/config/
+
 export default defineConfig({
   plugins: [
     react({
@@ -17,5 +18,18 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  server: {
+    proxy: {
+      "/api": {
+        target: process.env.VITE_API_BASE_URL || "http://localhost:8080",
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ""),
+      },
+    },
+  },
+  define: {
+    "process.env": process.env,
   },
 });
