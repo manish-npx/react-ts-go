@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useActionState } from "react"
 import { Button } from "../components/ui/button"
 import { Form } from "../components/ui/form"
 import { Input } from "../components/ui/input"
@@ -9,74 +9,59 @@ export interface FormDataType {
     email: string
     mobile: string
 }
+
+const submitForm = async (prevState: FormDataType[], formData: FormData) => {
+
+    const name = formData.get("name") as string
+    const email = formData.get("email") as string
+    const mobile = formData.get("mobile") as string
+
+    const newData: FormDataType = { name, email, mobile }
+
+    return [...prevState, newData]
+}
+
+
+
 const FormAction = () => {
 
 
+    const [storeData, formAction, isPending] = useActionState(submitForm, [])
 
 
-    const [formData, setFormData] = useState<FormDataType>({
-        name: "",
-        email: "",
-        mobile: "",
-    })
-    const [storeData, setStoreData] = useState<FormDataType[]>([])
+    console.log("storeData====>", storeData)
 
-    const handleFormSubmit = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
-        setFormData({ ...formData, [name]: value })
-    }
-
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-
-        setStoreData([...storeData, formData])
-        setFormData({
-            name: "",
-            email: "",
-            mobile: "",
-        })
-
-        console.log(storeData, "=====formData===>", formData)
-
-    }
 
     return (
         <div className="p-6">
             <Form>
-                <form method="post" action="#" className="space-y-6" onSubmit={(e) => handleSubmit(e)}>
+                <form method="post" action={formAction} className="space-y-6" >
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                             <Input
                                 id="name"
-                                value={formData.name}
                                 type="text"
                                 name="name"
                                 placeholder="Enter your name"
-                                onChange={handleFormSubmit}
                             />
                         </div>
 
                         <div>
                             <Input
                                 id="email"
-                                value={formData.email}
                                 type="email"
                                 name="email"
                                 placeholder="Enter your email"
-                                onChange={handleFormSubmit}
                             />
                         </div>
 
                         <div>
                             <Input
                                 id="mobile"
-                                value={formData.mobile}
                                 type="text"
                                 name="mobile"
                                 placeholder="Enter mobile number"
-                                onChange={handleFormSubmit}
                             />
                         </div>
                     </div>
@@ -84,8 +69,8 @@ const FormAction = () => {
                     <Button variant="destructive" type="button">
                         Cancle
                     </Button>
-                    <Button variant="secondary" type="submit">
-                        Submit
+                    <Button variant="secondary" type="submit" disabled={isPending}>
+                        {isPending ? "Submitting" : "Submit"}
                     </Button>
                 </form>
             </Form>

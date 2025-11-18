@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import { Button } from "../components/ui/button"
+import { Skeleton } from "../components/ui/skeleton"
+
 import {
     Item,
     ItemActions,
@@ -18,8 +20,34 @@ type BlogsType = {
     body: string
 }
 
+const BlogSkeleton = () => {
+    return (
+        <Item className="border rounded-lg p-4 shadow-sm">
+            <div className="flex items-start gap-4">
+                {/* Image skeleton */}
+                <Skeleton className="w-20 h-20 rounded-md" />
+
+                {/* Text skeleton */}
+                <div className="flex flex-col gap-2 w-full">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-5/6" />
+                </div>
+            </div>
+
+            {/* Button skeleton */}
+            <div className="mt-4">
+                <Skeleton className="h-8 w-full rounded-md" />
+            </div>
+        </Item>
+    )
+}
+
+
+
 const Blogs = () => {
     const [blogs, setBlogs] = useState<BlogsType[]>([])
+    const [isPending, setIsPending] = useState<boolean>(true)
 
 
     useEffect(() => {
@@ -28,6 +56,7 @@ const Blogs = () => {
                 const res = await fetch(`https://dummyjson.com/posts`)
                 const results = await res.json()
                 setBlogs(results.posts)
+                setIsPending(false)
             } catch (error) {
                 console.error(`error`, error)
             }
@@ -35,6 +64,24 @@ const Blogs = () => {
 
         fetchAPi()
     }, [])
+
+
+
+    if (isPending) {
+        return (
+            <div className="flex flex-col items-center py-6">
+                <div className="w-full max-w-2xl">
+                    <ItemGroup className="flex flex-col gap-4">
+                        {[1, 2, 3, 4, 5].map((_, i) => (
+                            <BlogSkeleton key={i} />
+                        ))}
+                    </ItemGroup>
+                </div>
+            </div>
+        )
+    }
+
+
 
     return (
         <div className="flex min-h-auto flex-col items-center justify-center py-6">
