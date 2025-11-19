@@ -29,8 +29,6 @@ const FormAction = () => {
     const [storeData, formAction, isPending] = useActionState(submitForm, [])
 
 
-    console.log("storeData====>", storeData)
-
 
     return (
         <div className="p-6">

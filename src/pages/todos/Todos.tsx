@@ -1,73 +1,140 @@
 import { useEffect, useState } from "react"
 import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import { todoService } from "../../services/api"
 import type { Todo } from "../../types/todo"
-
-
-const AddTodo = () => {
-    return (
-        <div className="flex w-full max-w-sm items-center gap-2 mb-6">
-            <Input type="text" placeholder="Todo title" />
-            <Button type="button" variant="outline">
-                Add
-            </Button>
-        </div>
-    )
-}
-
+import AddTodo from "./AddTodo"
+import UpdateTodo from "./UpdateTodo"
 
 const Todos = () => {
-
     const [todos, setTodos] = useState<Todo[]>([])
+    const [loading, setLoading] = useState(true)
+    const [editingTodo, setEditingTodo] = useState<Todo | null>(null)
+
+    const fetchTodos = async () => {
+        try {
+            setLoading(true)
+            const res = await todoService.getAll()
+            setTodos(res)
+        } catch (err) {
+            console.error("Failed to load todos", err)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
-        const handleFetch = async () => {
-            try {
-                const res = await todoService.getAll()
-                console.log("API Response:", res, Array.isArray(todos)) // Debug log
-                setTodos(res)
-            } catch (err) {
-                console.error("Failed to load todos", err)
-            }
-        }
-        handleFetch()
+        fetchTodos()
     }, [])
 
+    const handleUpdate = (todo: Todo) => {
+        setEditingTodo(todo)
+    }
 
-    console.log("todos", todos)
+    const handleTodoUpdated = () => {
+        setEditingTodo(null)
+        fetchTodos() // Refresh the list
+    }
 
+    const handleCancelEdit = () => {
+        setEditingTodo(null)
+    }
+
+    const handleDelete = async (id: string) => {
+        if (window.confirm("Are you sure you want to delete this todo?")) {
+            try {
+                await todoService.delete(id)
+                fetchTodos() // Refresh the list
+            } catch (error) {
+                console.error("Failed to delete todo:", error)
+            }
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="container mx-auto px-4 py-6">
+                <div className="text-center">Loading todos...</div>
+            </div>
+        )
+    }
 
     return (
-        <>
-            <h1>Add Todo </h1>
-            <AddTodo />
+        <div className="container mx-auto px-4 py-6">
+            <h1 className="text-2xl font-bold mb-4 text-center">Todo List</h1>
 
-            <Table className="w-full table-fixed">
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className="w-[120px] text-left">ID</TableHead>
-                        <TableHead className="text-left">Name</TableHead>
-                        <TableHead className="text-left">Email</TableHead>
-                        <TableHead className="text-left">Mobile</TableHead>
-                    </TableRow>
-                </TableHeader>
+            {/* Show Update Form when editing, otherwise show Add Form */}
+            {editingTodo ? (
+                <UpdateTodo
+                    updateTodo={editingTodo}
+                    onTodoUpdated={handleTodoUpdated}
+                    onCancel={handleCancelEdit}
+                />
+            ) : (
+                <div className="mb-6">
+                    <AddTodo onTodoAdded={fetchTodos} />
+                </div>
+            )}
 
-                <TableBody>
-                    {Array.isArray(todos) && todos.length > 0 && todos.map((vl, index) => (
-                        <TableRow key={index}>
-                            <TableCell className="whitespace-nowrap font-medium">
-                                {`IND-${vl.id + 1 * 1000}`}
-                            </TableCell>
-                            <TableCell>{vl.title}</TableCell>
-                            <TableCell>{vl.done}</TableCell>
+            <div className="overflow-x-auto">
+                <Table className="w-full">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[100px] text-center">ID</TableHead>
+                            <TableHead className="text-center">Title</TableHead>
+                            <TableHead className="w-[120px] text-center">Status</TableHead>
+                            <TableHead className="w-[120px] text-center">Actions</TableHead>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
 
-        </>
+                    <TableBody>
+                        {todos.length > 0 ? (
+                            todos.map((todo) => (
+                                <TableRow key={todo.id} className="text-center">
+                                    <TableCell className="font-medium">
+                                        {todo.id}
+                                    </TableCell>
+                                    <TableCell>{todo.title}</TableCell>
+                                    <TableCell>
+                                        <input
+                                            type="checkbox"
+                                            checked={todo.done}
+                                            readOnly
+                                            className="mx-auto"
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex justify-center space-x-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() => handleUpdate(todo)}
+                                                disabled={editingTodo?.id === todo.id}
+                                            >
+                                                Edit
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                onClick={() => handleDelete(todo.id)}
+                                            >
+                                                Delete
+                                            </Button>
+                                        </div>
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center text-gray-500">
+                                    No todos found. Add your first todo above!
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </div>
+        </div>
     )
 }
 

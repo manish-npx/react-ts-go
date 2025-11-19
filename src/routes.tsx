@@ -5,7 +5,7 @@ import BlogDetails from "./pages/BlogDetails"
 import Blogs from "./pages/Blogs"
 import FormAction from "./pages/FormAction"
 import Home from "./pages/Home"
-import Todos from "./pages/todos/todos"
+import Todos from "./pages/todos/Todos"
 
 
 const router = createBrowserRouter([

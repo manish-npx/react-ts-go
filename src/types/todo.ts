@@ -1,13 +1,12 @@
 export interface Todo {
-  id: number;
+  id: string;
   title: string;
   done: boolean;
-  create_time?: string; // Optional if your Go API returns it
 }
 
 export interface CreateTodoRequest {
   title: string;
-  done?: boolean;
+  done: boolean;
 }
 
 export interface UpdateTodoRequest {
